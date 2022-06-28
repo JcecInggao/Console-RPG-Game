@@ -1,7 +1,4 @@
 ﻿/*
- * The game will first ask for the Player’s name. Pressing “Enter” will save that name.
- * The game will present a Main Menu. Its options will be selected by pressing an associated letter or number. The prompt will be repeated on an invalid choice. The options are:
- * Display Statistics (number of games played, number of “Fights” won, number of “Fights” lost.
  * Display Inventory
  * This will contain another option to change the Equipped Weapon, change the Equipped Armour, or exit back to the main menu.
  * On the Change Equipped Weapon and Armour screens, users can select a letter/number value to change the Hero EquippedWeapon or EquippedArmour.
@@ -57,9 +54,21 @@ newGame.MainMenu();
  * Should be instantiated once at the start of the program, and invoke a method called Start which begins the game sequence.
  */
 
+
 class Game
 {
     public Hero Hero { get; set; }
+
+    public int ReadInput()
+    {
+        string playerInput = Console.ReadLine();
+        int inputCode;
+        if (int.TryParse(playerInput, out inputCode))
+        {
+            inputCode = int.Parse(playerInput);
+        }
+        return inputCode;
+    }
 
     public void MainMenu()
     {
@@ -67,24 +76,13 @@ class Game
         Console.WriteLine("========================================");
         Console.WriteLine($"What would you like to do {Hero.Name}?");
         Console.WriteLine();
-        Console.WriteLine("Display Statictics [1]");
-        Console.WriteLine("Display Inventory [2]");
-        Console.WriteLine("Fight [3]");
+        Console.WriteLine("[1] Display Statictics");
+        Console.WriteLine("[2] Display Inventory");
+        Console.WriteLine("[3] Fight");
         Console.WriteLine();
         Console.WriteLine("========================================");
 
-        string playerInput = Console.ReadLine();
-        int inputCode = 0;
-        if (!int.TryParse(playerInput, out inputCode))
-        {
-            Console.WriteLine("Not an integer");
-        }
-        else
-        {
-            inputCode = int.Parse(playerInput);
-        }
-
-        switch (inputCode)
+        switch (ReadInput())
         {
             case 1:
                 Hero.ShowStats();
@@ -93,7 +91,9 @@ class Game
                 Hero.ShowInventory();
                 break;
             case 3:
-
+                Console.WriteLine("Incomplete");
+                Console.ReadKey();
+                MainMenu();
                 break;
             default:
                 Console.WriteLine("Invalid input, please try again: ");
@@ -135,6 +135,9 @@ class Hero
     {
         Console.Clear();
         Console.WriteLine("========================================");
+        Console.WriteLine("Games Played: 0");
+        Console.WriteLine("Fights Won: 0");
+        Console.WriteLine("Fights Lost: 0");
         Console.WriteLine($"{Name} Stats:");
         Console.WriteLine($"Health: {CurrentHealth}/{OriginalHealth} ");
         Console.WriteLine($"Base Strength: {BaseStrength} ");
@@ -169,22 +172,121 @@ class Hero
         Console.WriteLine("Chainmail Armour----- Defence: 10");
         Console.WriteLine("Steel Armour -------- Defence: 15");
         Console.WriteLine("");
-        Console.WriteLine("Change Weapon [1]"); 
+        Console.WriteLine("[1] Change Weapon ");
+        Console.WriteLine("[2] Change Armour");
         Console.WriteLine("Press Enter/Return to go back");
         Console.WriteLine("========================================");
-        Console.ReadKey();
-        Game.MainMenu();
-
-
+        switch (Game.ReadInput())
+        {
+            case 1:
+                EquipWeapon();
+                break;
+            case 2:
+                EquipArmour();
+                break;
+            default:
+                Game.MainMenu();
+                break;
+        }
     }
     public void EquipWeapon()
     {
-        // Change the EquippedWeapon
-
+        Console.Clear();
+        Console.WriteLine("========================================");
+        Console.WriteLine($"Which Weapon would you like to equip?");
+        Console.WriteLine("");
+        Console.WriteLine("Weapons:");
+        Console.WriteLine("[1] Wooden Club --------- Attack: 5");
+        Console.WriteLine("[2] Dagger -------------- Attack: 10");
+        Console.WriteLine("[3] Mace ---------------- Attack: 15");
+        Console.WriteLine("[4] Greatsword ---------- Attack: 20");
+        Console.WriteLine("[5] Cancel");
+        Console.WriteLine("");
+        Console.WriteLine("========================================");
+        switch (Game.ReadInput())
+        {
+            case 1:
+                Console.WriteLine("Equipped: Wooden Club");
+                Console.ReadKey();
+                ShowInventory();
+                break;
+            case 2:
+                Console.WriteLine("Equipped: Dagger");
+                Console.ReadKey();
+                ShowInventory();
+                break;
+            case 3:
+                Console.WriteLine("Equipped: Mace");
+                Console.ReadKey();
+                ShowInventory();
+                break;
+            case 4:
+                Console.WriteLine("Equipped: Greatsword");
+                Console.ReadKey();
+                ShowInventory();
+                break;
+            case 5:
+                ShowInventory();
+                break;
+            default:
+                EquipWeapon();
+                break;
+        }
     }
     public void EquipArmour()
     {
-        //EquipArmour(Change the EquippedArmour
+        Console.Clear();
+        Console.WriteLine("========================================");
+        Console.WriteLine($"Which Armour would you like to equip?");
+        Console.WriteLine("");
+        Console.WriteLine("Weapons:");
+        Console.WriteLine("[1] No Armour---------- Defence: 1");
+        Console.WriteLine("[2] Leather Armour ------ Defence: 5");
+        Console.WriteLine("[3] Chainmail Armour----- Defence: 10");
+        Console.WriteLine("[4] Steel Armour -------- Defence: 15");
+        Console.WriteLine("[5] Cancel");
+        Console.WriteLine("");
+        Console.WriteLine("========================================");
+        switch (Game.ReadInput())
+        {
+            case 1:
+                Console.WriteLine("Equipped: No Armour");
+                Console.ReadKey();
+                ShowInventory();
+                break;
+            case 2:
+                Console.WriteLine("Equipped: Leather Armour");
+                Console.ReadKey();
+                ShowInventory();
+                break;
+            case 3:
+                Console.WriteLine("Equipped: Chainmail Armour");
+                Console.ReadKey();
+                ShowInventory();
+                break;
+            case 4:
+                Console.WriteLine("Equipped: Steel Armour");
+                Console.ReadKey();
+                ShowInventory();
+                break;
+            case 5:
+                ShowInventory();
+                break;
+            default:
+                Console.WriteLine("Invalid input, please try again: ");
+                Console.ReadKey();
+                EquipWeapon();
+                break;
+        }
+    }
+
+    public void CheckEquppied(Weapon weapon)
+    {
+
+    }
+    public void CheckEquppied(Armour armour)
+    {
+
     }
 }
 
@@ -268,12 +370,12 @@ class Fight
 {
     private int _monstersDefeated = 0;
     
-    public Hero Hero { get; set; } 
+    public Hero Player { get; set; } 
     public Monster Monster { get; set; }
 
     public Fight(Hero hero)
     {
-        Hero = hero;
+        Player = hero;
     }
 
     public void HeroTurn()
@@ -286,7 +388,7 @@ class Fight
   
     public void MonsterTurn()
     {
-        if (Hero.CurrentHealth <= 0)
+        if (Player.CurrentHealth <= 0)
         {
             Lose();
         }
