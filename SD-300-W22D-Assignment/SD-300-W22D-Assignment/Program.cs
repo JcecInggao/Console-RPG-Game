@@ -1,7 +1,4 @@
 ﻿/*
- * Display Inventory
- * This will contain another option to change the Equipped Weapon, change the Equipped Armour, or exit back to the main menu.
- * On the Change Equipped Weapon and Armour screens, users can select a letter/number value to change the Hero EquippedWeapon or EquippedArmour.
  * Fight, beginning a “fight” with a randomly selected “Monster” from a list of available monsters.
  * In each Fight, the Hero and Monster have Health (a number) which they take turns reducing by “attacking” each other.
  * The “Hero” takes a “turn” by attacking the Monster.
@@ -117,6 +114,8 @@ class Hero
     public int BaseDefence { get; set; } = 2;
     public int OriginalHealth { get; set; } = 100;
     public int CurrentHealth { get; set; }
+    public int WeaponEquppied { get; set; } = 5;
+    public int ArmourEquppied { get; set; } = 1;
 
     public Game Game = new Game();
 
@@ -157,8 +156,44 @@ class Hero
         Console.WriteLine($"{Name} Inventory:");
         Console.WriteLine("");
         Console.WriteLine("Equipped:");
-        Console.WriteLine("Wooden Club");
-        Console.WriteLine("No Armour");
+        switch (WeaponEquppied)
+        {
+            case 5:
+                Console.WriteLine("Wooden Club");
+                break;
+            case 10:
+                Console.WriteLine("Dagger");
+                break;
+            case 15:
+                Console.WriteLine("Mace");
+                break;
+            case 20:
+                Console.WriteLine("Greatsword");
+                break;
+            default:
+                // should never occur
+                Console.WriteLine("Invalid Weapon Equipped, please change current Weapon");
+                break;
+        }
+        switch (ArmourEquppied)
+        {
+            case 1:
+                Console.WriteLine("No Armour");
+                break;
+            case 5:
+                Console.WriteLine("Leather Armour");
+                break;
+            case 10:
+                Console.WriteLine("Chainmail Armour");
+                break;
+            case 15:
+                Console.WriteLine("Steel Armour");
+                break;
+            default:
+                // should never occur
+                Console.WriteLine("Invalid Armour Equipped, please change current Armour");
+                break;
+        }
         Console.WriteLine("");
         Console.WriteLine("Weapons:");
         Console.WriteLine("Wooden Club --------- Attack: 5");
@@ -207,22 +242,26 @@ class Hero
         {
             case 1:
                 Console.WriteLine("Equipped: Wooden Club");
+                WeaponEquppied = 5;
                 Console.ReadKey();
                 ShowInventory();
                 break;
             case 2:
                 Console.WriteLine("Equipped: Dagger");
+                WeaponEquppied = 10;
                 Console.ReadKey();
                 ShowInventory();
                 break;
             case 3:
                 Console.WriteLine("Equipped: Mace");
                 Console.ReadKey();
+                WeaponEquppied = 15;
                 ShowInventory();
                 break;
             case 4:
                 Console.WriteLine("Equipped: Greatsword");
                 Console.ReadKey();
+                WeaponEquppied = 20;
                 ShowInventory();
                 break;
             case 5:
@@ -240,7 +279,7 @@ class Hero
         Console.WriteLine($"Which Armour would you like to equip?");
         Console.WriteLine("");
         Console.WriteLine("Weapons:");
-        Console.WriteLine("[1] No Armour---------- Defence: 1");
+        Console.WriteLine("[1] No Armour------------ Defence: 1");
         Console.WriteLine("[2] Leather Armour ------ Defence: 5");
         Console.WriteLine("[3] Chainmail Armour----- Defence: 10");
         Console.WriteLine("[4] Steel Armour -------- Defence: 15");
@@ -251,21 +290,25 @@ class Hero
         {
             case 1:
                 Console.WriteLine("Equipped: No Armour");
+                ArmourEquppied = 1;
                 Console.ReadKey();
                 ShowInventory();
                 break;
             case 2:
                 Console.WriteLine("Equipped: Leather Armour");
+                ArmourEquppied = 5;
                 Console.ReadKey();
                 ShowInventory();
                 break;
             case 3:
                 Console.WriteLine("Equipped: Chainmail Armour");
+                ArmourEquppied = 10;
                 Console.ReadKey();
                 ShowInventory();
                 break;
             case 4:
                 Console.WriteLine("Equipped: Steel Armour");
+                ArmourEquppied = 15;
                 Console.ReadKey();
                 ShowInventory();
                 break;
@@ -275,7 +318,7 @@ class Hero
             default:
                 Console.WriteLine("Invalid input, please try again: ");
                 Console.ReadKey();
-                EquipWeapon();
+                EquipArmour();
                 break;
         }
     }
