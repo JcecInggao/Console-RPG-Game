@@ -14,17 +14,77 @@
  * If either the Hero or the Monster is reduced to 0 Current Health from an attack, that character loses the fight and the other character wins.
  * After each Fight, the win or loss is recorded, and the user is returned to the Main Menu.
  */
+
+Game newGame = new Game();
+
 Console.WriteLine("What is your name?");
-Hero hero = new Hero(Console.ReadLine());
+Hero hero = new Hero(Console.ReadLine(), newGame);
+newGame.Hero = hero;
 
-Weapon starterWeapon = new Weapon("Wooden Sword", 2);
 
-Monster enemy1 = new Monster("Munstar", 2, 1, 5);
-Monster enemy2 = new Monster("Munstar", 3, 2, 7);
-Monster enemy3 = new Monster("Munstar", 4, 3, 10);
-Monster enemy4 = new Monster("Munstar", 5, 4, 15);
-Monster enemy5 = new Monster("Munstar", 6, 5, 20);
 
+Monster enemy1 = new Monster("Munstar", 3, 2, 20);
+Monster enemy2 = new Monster("Munstar", 6, 3, 7);
+Monster enemy3 = new Monster("Munstar", 9, 4, 10);
+Monster enemy4 = new Monster("Munstar", 12, 5, 15);
+Monster enemy5 = new Monster("Munstar", 15, 6, 20);
+
+newGame.MainMenu();
+
+
+/*
+ * Display the Main Menu
+ * Select Main Menu options with user input (using a switch statement).
+ * Handle the display and switching of any other menus. The User must be able to reach the main menu at any time.
+ * Should be instantiated once at the start of the program, and invoke a method called Start which begins the game sequence.
+ */
+
+class Game
+{
+    public Hero Hero { get; set; }
+
+    public void MainMenu()
+    {
+        Console.Clear();
+        Console.WriteLine("========================================");
+        Console.WriteLine($"What would you like to do {Hero.Name}?");
+        Console.WriteLine();
+        Console.WriteLine("Display Statictics [1]");
+        Console.WriteLine("Display Inventory [2]");
+        Console.WriteLine("Fight [3]");
+        Console.WriteLine();
+        Console.WriteLine("========================================");
+
+        string playerInput = Console.ReadLine();
+        int inputCode = 0;
+        if (!int.TryParse(playerInput, out inputCode))
+        {
+            Console.WriteLine("Not an integer");
+        }
+        else
+        {
+            inputCode = int.Parse(playerInput);
+        }
+
+        switch (inputCode)
+        {
+            case 1:
+                Hero.ShowStats();
+                break;
+            case 2:
+                Hero.ShowInventory();
+                break;
+            case 3:
+
+                break;
+            default:
+                Console.WriteLine("Invalid input, please try again: ");
+                Console.ReadKey();
+                MainMenu();
+                break;
+        }
+    }
+}
 
 
 /*
@@ -32,51 +92,69 @@ Monster enemy5 = new Monster("Munstar", 6, 5, 20);
  * EquippedWeapon (An instance of Weapon used to calculate attack damage)
  * EquippedArmor (An instance of Armour used to calculate damage to the Hero)
  */
-class MainMenu
-{ 
-
-}
-
 class Hero
 {
     public string Name { get; set; }
     public int BaseStrength { get; set; } = 5;
     public int BaseDefence { get; set; } = 2;
-    public int OriginalHealth { get; set; } = 20;
-    public int CurrentHealth { get; set; } = 20;
+    public int OriginalHealth { get; set; } = 100;
+    public int CurrentHealth { get; set; }
+    public Game Game = new Game();
 
-    public Hero(string name)
+    public Hero(string name, Game game)
     {
         Name = name;
         BaseStrength = 5;
         BaseDefence = 2;
         OriginalHealth = 20;
-        CurrentHealth = 20;
+        CurrentHealth = OriginalHealth;
+        Game = game;
     }
+
 
     public void ShowStats()
     {
+        Console.Clear();
         Console.WriteLine("========================================");
         Console.WriteLine($"{Name} Stats:");
         Console.WriteLine($"Health: {CurrentHealth}/{OriginalHealth} ");
         Console.WriteLine($"Base Strength: {BaseStrength} ");
         Console.WriteLine($"Base Defence: {BaseDefence}");
+        Console.WriteLine("");
+        Console.WriteLine("Press Enter/Return to go back");
         Console.WriteLine("========================================");
-
+        Console.ReadKey();
+        Game.MainMenu();
     }
 
     public void ShowInventory()
     {
-        //(Returns what items the Hero is Equipped with)
+        // returns what items the Hero is Equipped with
+        Console.WriteLine("========================================");
+        Console.WriteLine($"{Name} Inventory:");
+        Console.WriteLine("");
+        //foreach (Weapon item in collection)
+        //{
+
+        //}
+        Console.WriteLine("");
+        Console.WriteLine("Change Weapon [1]"); 
+        Console.WriteLine("");
+        Console.WriteLine("Press Enter/Return to go back");
+        Console.WriteLine("========================================");
+        Console.ReadKey();
+        Game.MainMenu();
+
+
     }
     public void EquipWeapon()
     {
-        //EquipWeapon (Change the EquippedWeapon)
+        // Change the EquippedWeapon
 
     }
     public void EquipArmour()
     {
-        //EquipArmour(Change the EquippedArmour)
+        //EquipArmour(Change the EquippedArmour
     }
 }
 
@@ -132,11 +210,15 @@ class Armour
  */
 static class WeaponList
 {
+    public static List<Weapon> Weapons { get; set; } = new List<Weapon>();
+    public static void AddWeapon(Weapon weapon)
+    {
 
+    }
 }
 static class ArmourList
 {
-
+    public static List<Armour> Armours { get; set; } = new List<Armour>();
 }
 
 /*
@@ -150,30 +232,56 @@ static class ArmourList
  */
 class Fight
 {
+    private int _monstersDefeated = 0;
+    
+    public Hero Hero { get; set; } 
+    public Monster Monster { get; set; }
+
+    public Fight(Hero hero)
+    {
+        Hero = hero;
+    }
+
     public void HeroTurn()
     {
-
+        if (Monster.CurrentHealth <= 0)
+        {
+            Win();
+        }
     }
   
     public void MonsterTurn()
     {
-
+        if (Hero.CurrentHealth <= 0)
+        {
+            Lose();
+        }
     }
 
     public void Win()
     {
-
+        _monstersDefeated++;
+        if (_monstersDefeated >= 5)
+        {
+            Console.Clear();
+            Console.WriteLine("========================================");
+            Console.WriteLine("");
+            Console.WriteLine("Congratulations");
+            Console.WriteLine("You Win");
+            Console.WriteLine("");
+            Console.WriteLine("========================================");
+        }
     }
 
     public void Lose()
     {
-
+        Console.Clear();
+        Console.WriteLine("========================================");
+        Console.WriteLine("");
+        Console.WriteLine("You Died");
+        Console.WriteLine("Game Over");
+        Console.WriteLine("");
+        Console.WriteLine("========================================");
     }
 }
 
-/*
- * Display the Main Menu
- * Select Main Menu options with user input (using a switch statement).
- * Handle the display and switching of any other menus. The User must be able to reach the main menu at any time.
- * Should be instantiated once at the start of the program, and invoke a method called Start which begins the game sequence.
- */
