@@ -21,6 +21,24 @@ Console.WriteLine("What is your name?");
 Hero hero = new Hero(Console.ReadLine(), newGame);
 newGame.Hero = hero;
 
+Weapon starterWeapon = new Weapon("Wooden Club", 5);
+Weapon weakWeapon = new Weapon("Dagger", 10);
+Weapon midWeapon = new Weapon("Mace", 15);
+Weapon strongWeapon = new Weapon("Greatsword", 20);
+WeaponList.AddWeapon(starterWeapon);
+WeaponList.AddWeapon(weakWeapon);
+WeaponList.AddWeapon(midWeapon);
+WeaponList.AddWeapon(strongWeapon);
+
+
+Armour starterArmour = new Armour("No Armour", 1);
+Armour weakArmour = new Armour("Leather Armour", 5);
+Armour midArmour = new Armour("Chainmail Armour", 10);
+Armour strongArmour = new Armour("Steel Armour", 15);
+ArmourList.AddArmour(starterArmour);
+ArmourList.AddArmour(weakArmour);
+ArmourList.AddArmour(midArmour);
+ArmourList.AddArmour(strongArmour);
 
 
 Monster enemy1 = new Monster("Munstar", 3, 2, 20);
@@ -99,6 +117,7 @@ class Hero
     public int BaseDefence { get; set; } = 2;
     public int OriginalHealth { get; set; } = 100;
     public int CurrentHealth { get; set; }
+
     public Game Game = new Game();
 
     public Hero(string name, Game game)
@@ -130,16 +149,27 @@ class Hero
     public void ShowInventory()
     {
         // returns what items the Hero is Equipped with
+        Console.Clear();
         Console.WriteLine("========================================");
         Console.WriteLine($"{Name} Inventory:");
         Console.WriteLine("");
-        //foreach (Weapon item in collection)
-        //{
-
-        //}
+        Console.WriteLine("Equipped:");
+        Console.WriteLine("Wooden Club");
+        Console.WriteLine("No Armour");
+        Console.WriteLine("");
+        Console.WriteLine("Weapons:");
+        Console.WriteLine("Wooden Club --------- Attack: 5");
+        Console.WriteLine("Dagger -------------- Attack: 10");
+        Console.WriteLine("Mace ---------------- Attack: 15");
+        Console.WriteLine("Greatsword ---------- Attack: 20");
+        Console.WriteLine("");
+        Console.WriteLine("Armours:");
+        Console.WriteLine("No Armour ---------- Defence: 1");
+        Console.WriteLine("Leather Armour ------ Defence: 5");
+        Console.WriteLine("Chainmail Armour----- Defence: 10");
+        Console.WriteLine("Steel Armour -------- Defence: 15");
         Console.WriteLine("");
         Console.WriteLine("Change Weapon [1]"); 
-        Console.WriteLine("");
         Console.WriteLine("Press Enter/Return to go back");
         Console.WriteLine("========================================");
         Console.ReadKey();
@@ -213,12 +243,16 @@ static class WeaponList
     public static List<Weapon> Weapons { get; set; } = new List<Weapon>();
     public static void AddWeapon(Weapon weapon)
     {
-
+        Weapons.Add(weapon);
     }
 }
 static class ArmourList
 {
     public static List<Armour> Armours { get; set; } = new List<Armour>();
+    public static void AddArmour(Armour armour)
+    {
+        Armours.Add(armour);
+    }
 }
 
 /*
