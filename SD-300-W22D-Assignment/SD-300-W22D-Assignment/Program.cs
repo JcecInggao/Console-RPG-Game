@@ -13,7 +13,7 @@ Game newGame = new Game();
 
 Console.WriteLine("What is your name?");
 Hero hero = new Hero(Console.ReadLine(), newGame);
-newGame.Hero = hero;
+newGame.Player = hero;
 
 // Weapons
 WeaponList.AddWeapon(new Weapon("Wooden Club", 5));
@@ -29,19 +29,18 @@ ArmourList.AddArmour(new Armour("Steel Armour", 15));
 
 // Monsters (name, att, def, hp, isDead)
 newGame.Monsters.Add(new Monster("MonStart", 3, 2, 20, false));
-newGame.Monsters.Add(new Monster("Munstir", 6, 3, 7, false));
-newGame.Monsters.Add(new Monster("Munchstur", 9, 4, 10, false));
-newGame.Monsters.Add(new Monster("Munstar", 12, 5, 15, false));
-newGame.Monsters.Add(new Monster("MonEND", 15, 6, 20, false));
+newGame.Monsters.Add(new Monster("Munstir", 6, 3, 50, false));
+newGame.Monsters.Add(new Monster("Munchstur", 9, 4, 70, false));
+newGame.Monsters.Add(new Monster("Munstar", 12, 5, 100, false));
+newGame.Monsters.Add(new Monster("MonEND", 15, 6, 150, false));
 
 newGame.Start();
 
 class Game
 {
-    public Hero Hero { get; set; }
-    public Fight Combat { get; set; }
+    public Hero Player { get; set; }
+    public Fight Combat { get; set; } = new Fight();
     public List<Monster> Monsters { get; set; } = new List<Monster>();
-
 
     public void Start()
     {
@@ -62,7 +61,7 @@ class Game
     {
         Console.Clear();
         Console.WriteLine("========================================");
-        Console.WriteLine($"What would you like to do {Hero.Name}?");
+        Console.WriteLine($"What would you like to do {Player.Name}?");
         Console.WriteLine();
         Console.WriteLine("[1] Display Statictics");
         Console.WriteLine("[2] Display Inventory");
@@ -72,18 +71,20 @@ class Game
 
         switch (ReadInput())
         {
-            case 1: 
-                Hero.ShowStats();
+            case 1:
+                Player.ShowStats();
                 break;
             case 2:
-                Hero.ShowInventory();
+                Player.ShowInventory();
                 break;
+
+
             case 3:
                 //create new list for alive monsters
                 List<Monster> availableMonsters = new List<Monster>();
                 foreach (Monster monster in Monsters)
                 {
-                // checks if the monster list for alive monsters 
+                    // checks if the monster list for alive monsters 
                     if (!monster.IsDead)
                     {
                         // adds available Monsters to a new list
@@ -94,10 +95,23 @@ class Game
                 //select random monster
                 Random rng = new Random();
                 int monsterIndex = rng.Next(availableMonsters.Count);
-                Monster currentEnemy = availableMonsters[monsterIndex];
-                Console.WriteLine("Initiating battle, Press enter to continue");
-                Combat.StartFight(Hero, currentEnemy);
+
+                if (monsterIndex > 0)
+                {
+                    Monster currentEnemy = availableMonsters[monsterIndex];
+                    Console.WriteLine("Initiating battle, Press enter to continue");
+                    Console.ReadKey();
+                    //MainMenu();
+                    Combat.StartFight(Player, currentEnemy);
+                }                
+                else
+                {
+                    BeatGame();
+                }
+
+                
                 break;
+
             default:
                 Console.WriteLine("Invalid input, please try again: ");
                 Console.ReadKey();
@@ -105,20 +119,31 @@ class Game
                 break;
         }
     }
+
+    public void BeatGame()
+    {
+        Console.WriteLine("Congrats you beat the game");
+    }
+
+    public void GameOver()
+    {
+        foreach (Monster monster in Monsters)
+        {
+            // checks if the monster list for alive monsters 
+            if (monster.IsDead)
+            {
+                monster.IsDead = false;
+            }
+        }
+    }
 }
 
-
-/*
- * Hero, which represents the user, with the following properties:
- * EquippedWeapon (An instance of Weapon used to calculate attack damage)
- * EquippedArmor (An instance of Armour used to calculate damage to the Hero)
- */
 class Hero
 {
     // basic stats
     public string Name { get; set; }
     public int BaseStrength { get; set; } = 5;
-    public int BaseDefence { get; set; } = 2;
+    public int BaseDefence { get; set; } = 5;
     public int OriginalHealth { get; set; } = 100;
     public int CurrentHealth { get; set; }
     // inventory
@@ -134,9 +159,6 @@ class Hero
     public Hero(string name, Game game)
     {
         Name = name;
-        BaseStrength = 5;
-        BaseDefence = 2;
-        OriginalHealth = 20;
         CurrentHealth = OriginalHealth;
         Game = game;
     }
@@ -146,13 +168,15 @@ class Hero
     {
         Console.Clear();
         Console.WriteLine("========================================");
+        Console.WriteLine($"{Name} Stats:");
+        Console.WriteLine("");
         Console.WriteLine($"Games Played: {GamesPlayed}");
         Console.WriteLine($"Fights Won: {FightsWon}");
         Console.WriteLine($"Fights Lost: {FightsLost}");
-        Console.WriteLine($"{Name} Stats:");
+        Console.WriteLine("");
         Console.WriteLine($"Health: {CurrentHealth}/{OriginalHealth} ");
-        Console.WriteLine($"Base Strength: {BaseStrength} ");
-        Console.WriteLine($"Base Defence: {BaseDefence}");
+        Console.WriteLine($"Base Strength: {BaseStrength} | Weapon: {WeaponEquppied} | Total: {BaseStrength + WeaponEquppied}");
+        Console.WriteLine($"Base Defence: {BaseDefence}  | Armour: {ArmourEquppied} | Total: {BaseDefence + ArmourEquppied}");
         Console.WriteLine("");
         Console.WriteLine("Press Enter/Return to go back");
         Console.WriteLine("========================================");
@@ -345,15 +369,10 @@ class Monster
         Defense = defense;
         OriginalHealth = originalHealth;
         CurrentHealth = originalHealth;
-        IsDead = isDead;    
+        IsDead = isDead;
     }
 }
 
-/*
- * Weapon and Armour
- * Name (A predefined name for the instance – may be hard-coded).
- * Power (A number, added to the Hero’s attack damage for a Weapon, or subtracted from the Monster’s attack damage for Armour)
- */
 class Weapon
 {
     public string Name { get; set; }
@@ -365,6 +384,7 @@ class Weapon
         Power = power;
     }
 }
+
 class Armour
 {
     public string Name { get; set; }
@@ -379,11 +399,14 @@ class Armour
 static class WeaponList
 {
     public static List<Weapon> Weapons { get; set; } = new List<Weapon>();
+    
     public static void AddWeapon(Weapon weapon)
     {
         Weapons.Add(weapon);
     }
 
+    // called in the ShowInventory method to display weapons
+    // displays all weapons even if new weapons are created or added 
     public static void ShowWeapons()
     {
         foreach (Weapon weapons in Weapons)
@@ -406,6 +429,8 @@ static class ArmourList
         Armours.Add(armour);
     }
 
+    // called in the ShowInventory method to display armours
+    // displays all weapons even if new armours are created or added 
     public static void ShowArmours()
     {
         foreach (Armour armours in Armours)
@@ -433,7 +458,7 @@ static class ArmourList
 class Fight
 {
     private int _monstersDefeated = 0;
-    
+
     public Hero Player { get; set; }
     public Monster Enemy { get; set; }
 
@@ -453,20 +478,53 @@ class Fight
     public void HeroTurn()
     {
         // The “damage” of that attack is calculated based on the Hero’s Base Strength + Equipped Weapon Power. Damage subtracts from the Current Health of the Monster.
+        Console.Clear();
         Console.WriteLine("========================================");
         Console.WriteLine("What would you like to do?");
+        Console.WriteLine("");
+        Console.WriteLine("Attack: Deal damage based on your strength");
+        Console.WriteLine("Heal: Heal a random amount of health based on your defense");
+        Console.WriteLine("Run: End Fight");
+        Console.WriteLine("");
+        Console.WriteLine($"{Player.Name}: {Player.CurrentHealth}/{Player.OriginalHealth}");
+        Console.WriteLine($"{Enemy.Name}: {Enemy.CurrentHealth}/{Enemy.OriginalHealth}");
+        Console.WriteLine("");
+        Console.WriteLine("--------------");
+        Console.WriteLine("[1] Attack");
+        Console.WriteLine("[2] Heal");
+        Console.WriteLine("[3] Run");
+        Console.WriteLine("--------------");
         Console.WriteLine("========================================");
         Console.ReadKey();
-        Enemy.CurrentHealth = 0;
+
+
         if (Enemy.CurrentHealth <= 0)
         {
             Win();
         }
     }
-  
+
     public void MonsterTurn()
     {
         // The “damage” of that attack is calculated by subtracting the Hero’s Base Defence, and Equipped Armour’s Power, from the Monster’s Strength. The result is subtracted from the Hero’s Current Health.
+        int monsterDamage = 0;
+
+        Console.Clear();
+        Console.WriteLine("========================================");
+        Console.WriteLine($"{Enemy.Name} is attacking");
+        Console.WriteLine($"{Enemy.Name} did __ damage!");
+        Console.WriteLine("");
+        Console.WriteLine($"{Player.Name}: {Player.CurrentHealth}/{Player.OriginalHealth}");
+        Console.WriteLine($"{Enemy.Name}: {Enemy.CurrentHealth}/{Enemy.OriginalHealth}");
+        Console.WriteLine("");
+        Console.WriteLine("--------------");
+        Console.WriteLine("[1] Attack");
+        Console.WriteLine("[2] Heal");
+        Console.WriteLine("[3] Run");
+        Console.WriteLine("--------------");
+        Console.WriteLine("========================================");
+        Console.ReadKey();
+
         if (Player.CurrentHealth <= 0)
         {
             Lose();
