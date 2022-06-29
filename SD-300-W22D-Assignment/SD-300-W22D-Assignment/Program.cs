@@ -1,15 +1,4 @@
-﻿/*
- * Fight, beginning a “fight” with a randomly selected “Monster” from a list of available monsters.
- * In each Fight, the Hero and Monster have Health (a number) which they take turns reducing by “attacking” each other.
- * The “Hero” takes a “turn” by attacking the Monster.
- * The “damage” of that attack is calculated based on the Hero’s Base Strength + Equipped Weapon Power. Damage subtracts from the Current Health of the Monster.
- * The “Monster” takes a “turn” by attacking the Hero.
- * The “damage” of that attack is calculated by subtracting the Hero’s Base Defence, and Equipped Armour’s Power, from the Monster’s Strength. The result is subtracted from the Hero’s Current Health.
- * If either the Hero or the Monster is reduced to 0 Current Health from an attack, that character loses the fight and the other character wins.
- * After each Fight, the win or loss is recorded, and the user is returned to the Main Menu.
- */
-
-Game newGame = new Game();
+﻿Game newGame = new Game();
 
 Console.WriteLine("What is your name?");
 Hero hero = new Hero(Console.ReadLine(), newGame);
@@ -120,6 +109,18 @@ class Game
         }
     }
 
+    public void ShowAliveMonsters()
+    {
+        foreach (Monster monster in Monsters)
+        {
+            // checks if the monster list for alive monsters 
+            if (!monster.IsDead)
+            {
+                Console.WriteLine($"{monster.Name} is still alive!");
+            }
+        }
+    }
+
     public void BeatGame()
     {
         Console.WriteLine("Congrats you beat the game");
@@ -142,7 +143,7 @@ class Hero
 {
     // basic stats
     public string Name { get; set; }
-    public int BaseStrength { get; set; } = 5;
+    public int BaseStrength { get; set; } = 50;
     public int BaseDefence { get; set; } = 5;
     public int OriginalHealth { get; set; } = 100;
     public int CurrentHealth { get; set; }
@@ -174,10 +175,11 @@ class Hero
         Console.WriteLine($"Fights Won: {FightsWon}");
         Console.WriteLine($"Fights Lost: {FightsLost}");
         Console.WriteLine("");
-        Console.WriteLine($"Health: {CurrentHealth}/{OriginalHealth} ");
+        Console.WriteLine($"Health: {CurrentHealth}HP/{OriginalHealth}HP ");
         Console.WriteLine($"Base Strength: {BaseStrength} | Weapon: {WeaponEquppied} | Total: {BaseStrength + WeaponEquppied}");
         Console.WriteLine($"Base Defence: {BaseDefence}  | Armour: {ArmourEquppied} | Total: {BaseDefence + ArmourEquppied}");
         Console.WriteLine("");
+        Game.ShowAliveMonsters();
         Console.WriteLine("Press Enter/Return to go back");
         Console.WriteLine("========================================");
         Console.ReadKey();
@@ -446,32 +448,34 @@ static class ArmourList
     }
 }
 
-/*
- * 
- * Fight
- * Handles the organization of any Fight. Should be instantiated whenever a Fight is started by the player.
- * HeroTurn (calculates an handles “damage” to a monster as Hero BaseStrength + EquippedWeapon Power)
- * MonsterTurn (calculates and handles “damage” to the Hero as Monster Strength – (Hero BaseDefence­ + EquippedArmour Power)
- * Win (check and handle if the Monster CurrentHealth reaches 0. If the Hero wins, the Monster should no longer appear in the game, until the Hero Loses.)
- * Lose (check and handle if the Player CurrentHealth eaches 0. If the Hero Loses, their CurrentHealth is set to equal their OriginalHealth, and any Monsters that were previously defeated can appear again).
- */
+
 class Fight
 {
     private int _monstersDefeated = 0;
 
     public Hero Player { get; set; }
     public Monster Enemy { get; set; }
-
+    public Game Game { get; set; }
     public void StartFight(Hero hero, Monster monster)
     {
         Player = hero;
         Enemy = monster;
-        while (hero.CurrentHealth > 0 || monster.CurrentHealth > 0)
+        Game = hero.Game;
+        while (Player.CurrentHealth > 0 && Enemy.CurrentHealth > 0)
         {
             Console.Clear();
-            Console.WriteLine("Test");
             HeroTurn();
+            if (Enemy.CurrentHealth < 1)
+            {
+                Win();
+                break;
+            }
             MonsterTurn();
+            if (Player.CurrentHealth < 1)
+            {
+                Lose();
+                break;
+            }
         }
     }
 
@@ -486,8 +490,8 @@ class Fight
         Console.WriteLine("Heal: Heal a random amount of health based on your defense");
         Console.WriteLine("Run: End Fight");
         Console.WriteLine("");
-        Console.WriteLine($"{Player.Name}: {Player.CurrentHealth}/{Player.OriginalHealth}");
-        Console.WriteLine($"{Enemy.Name}: {Enemy.CurrentHealth}/{Enemy.OriginalHealth}");
+        Console.WriteLine($"{Player.Name}: {Player.CurrentHealth}HP/{Player.OriginalHealth}HP");
+        Console.WriteLine($"{Enemy.Name}: {Enemy.CurrentHealth}HP/{Enemy.OriginalHealth}HP");
         Console.WriteLine("");
         Console.WriteLine("--------------");
         Console.WriteLine("[1] Attack");
@@ -495,56 +499,154 @@ class Fight
         Console.WriteLine("[3] Run");
         Console.WriteLine("--------------");
         Console.WriteLine("========================================");
-        Console.ReadKey();
+        Console.WriteLine("");
 
-
-        if (Enemy.CurrentHealth <= 0)
+        // CheckInput
+        string playerInput = Console.ReadLine();
+        int inputCode;
+        if (int.TryParse(playerInput, out inputCode))
         {
-            Win();
+            inputCode = int.Parse(playerInput);
+        }
+
+        switch (inputCode)
+        {
+            // attack
+            case 1:
+                int dealtDamage = DamageCalculator(Player.BaseStrength, Player.WeaponEquppied);
+                Enemy.CurrentHealth = Enemy.CurrentHealth - dealtDamage;
+                Console.WriteLine($"You strike {Enemy.Name}, dealing {dealtDamage} damage!");
+                Console.ReadKey();
+                break;
+            case 2:
+                int damageHeal = DamageCalculator(Player.BaseDefence, Player.ArmourEquppied);
+                Player.CurrentHealth = Player.CurrentHealth + damageHeal;
+                if (Player.CurrentHealth > Player.OriginalHealth)
+                {
+                    Console.WriteLine($"You drink a potion, restoring {damageHeal}HP");
+                    damageHeal = Player.CurrentHealth - Player.OriginalHealth;
+                    Console.WriteLine($"You've overhealed, only {damageHeal}HP was restored");
+                    Player.CurrentHealth = Player.OriginalHealth;
+                } else
+                {
+                    Console.WriteLine($"You drink a potion, restoring {damageHeal} HP");
+                }
+                Console.WriteLine($"{Player.Name}: {Player.CurrentHealth}HP/{Player.OriginalHealth}HP");
+                Console.ReadKey();
+                break;
+            case 3:
+                Console.WriteLine($"You flee from {Enemy.Name}");
+                Player.FightsLost++;
+                Console.ReadKey();
+                Game.MainMenu();
+                break;
+            default:
+                break;
         }
     }
 
     public void MonsterTurn()
     {
         // The “damage” of that attack is calculated by subtracting the Hero’s Base Defence, and Equipped Armour’s Power, from the Monster’s Strength. The result is subtracted from the Hero’s Current Health.
-        int monsterDamage = 0;
-
+        int dealtDamage = DamageCalculator(Enemy.Strength);
+        Player.CurrentHealth = Player.CurrentHealth - dealtDamage;
         Console.Clear();
         Console.WriteLine("========================================");
         Console.WriteLine($"{Enemy.Name} is attacking");
-        Console.WriteLine($"{Enemy.Name} did __ damage!");
+        Console.WriteLine($"{Enemy.Name} did {dealtDamage} damage!");
         Console.WriteLine("");
         Console.WriteLine($"{Player.Name}: {Player.CurrentHealth}/{Player.OriginalHealth}");
         Console.WriteLine($"{Enemy.Name}: {Enemy.CurrentHealth}/{Enemy.OriginalHealth}");
         Console.WriteLine("");
-        Console.WriteLine("--------------");
-        Console.WriteLine("[1] Attack");
-        Console.WriteLine("[2] Heal");
-        Console.WriteLine("[3] Run");
-        Console.WriteLine("--------------");
+        Console.WriteLine("Press enter to continue");
         Console.WriteLine("========================================");
         Console.ReadKey();
 
-        if (Player.CurrentHealth <= 0)
-        {
-            Lose();
-        }
     }
 
+    // Monster attack
+    public int DamageCalculator(int strength)
+    {
+        // possibly higher damage
+        Random rand = new Random();
+        int critChance = rand.Next(1, 100);
+        int playerBaseDamage = strength;
+        // adds random chance to do extra damage
+        int randomMultiplier = rand.Next(-5, 5);
+        int totalDamage = playerBaseDamage + randomMultiplier;
+        // 2% to crit
+        if (critChance < 2)
+        {
+            // does extra 1.5 damage
+            totalDamage = totalDamage + totalDamage / 2;
+        }
+
+        return totalDamage;
+    }
+
+    // Player attack
+    public int DamageCalculator(int strength, int weaponStrength)
+    {
+        // higher chance to crit
+        Random rand = new Random();
+        int critChance = rand.Next(1, 100);
+        int BaseDamage = strength + weaponStrength;
+        // adds random chance to do extra damage
+        int randomMultiplier = rand.Next(-3, 3);
+        int totalDamage = BaseDamage + randomMultiplier;
+        // 10% to crit
+        if (critChance < 100)
+        {
+            // does extra 1.5 damage
+            totalDamage = totalDamage + totalDamage / 2;
+        }
+
+        return totalDamage;
+    }
+
+    public int Heal(int defense)
+    {
+        // possibly higher damage
+        Random rand = new Random();
+        int critChance = rand.Next(1, 100);
+        int baseHeal = defense;
+        // adds random chance to do extra healing
+        int randomMultiplier = rand.Next(-3, 10);
+        int totalHeal = baseHeal + randomMultiplier;
+        // % to crit
+        if (critChance < 10)
+        {
+            // does extra 1.5 damage
+            totalHeal = totalHeal + totalHeal / 2;
+        }
+
+        return totalHeal;
+    }
     public void Win()
     {
+        Player.FightsLost++;
         _monstersDefeated++;
         Console.Clear();
         Console.WriteLine("========================================");
         Console.WriteLine("");
         Console.WriteLine("Congratulations");
-        Console.WriteLine("You Win");
+        Console.WriteLine($"You Beat {Enemy.Name}");
         Console.WriteLine("");
         Console.WriteLine("========================================");
     }
 
     public void Lose()
     {
+        Player.FightsLost++;
+        _monstersDefeated = 0;
+        // revives monsters
+        foreach (Monster monster in Game.Monsters)
+        {
+            if (monster.IsDead)
+            {
+                monster.IsDead = false;
+            }
+        }
         Console.Clear();
         Console.WriteLine("========================================");
         Console.WriteLine("");
