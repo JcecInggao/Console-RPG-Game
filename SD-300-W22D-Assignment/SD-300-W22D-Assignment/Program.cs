@@ -31,6 +31,7 @@ class Game
     public Fight Combat { get; set; } = new Fight();
     public List<Monster> Monsters { get; set; } = new List<Monster>();
 
+    // This method calls upon the main menu
     public void Start()
     {
         MainMenu();
@@ -84,21 +85,11 @@ class Game
                 //select random monster
                 Random rng = new Random();
                 int monsterIndex = rng.Next(availableMonsters.Count);
-
-                if (monsterIndex > 0)
-                {
-                    Monster currentEnemy = availableMonsters[monsterIndex];
-                    Console.WriteLine("Initiating battle, Press enter to continue");
-                    Console.ReadKey();
-                    //MainMenu();
-                    Combat.StartFight(Player, currentEnemy);
-                }                
-                else
-                {
-                    BeatGame();
-                }
-
-                
+                Monster currentEnemy = availableMonsters[monsterIndex];
+                Console.WriteLine("Initiating battle, Press enter to continue");
+                Console.ReadKey();
+                //MainMenu();
+                Combat.StartFight(Player, currentEnemy);
                 break;
 
             default:
@@ -106,35 +97,6 @@ class Game
                 Console.ReadKey();
                 MainMenu();
                 break;
-        }
-    }
-
-    public void ShowAliveMonsters()
-    {
-        foreach (Monster monster in Monsters)
-        {
-            // checks if the monster list for alive monsters 
-            if (!monster.IsDead)
-            {
-                Console.WriteLine($"{monster.Name} is still alive!");
-            }
-        }
-    }
-
-    public void BeatGame()
-    {
-        Console.WriteLine("Congrats you beat the game");
-    }
-
-    public void GameOver()
-    {
-        foreach (Monster monster in Monsters)
-        {
-            // checks if the monster list for alive monsters 
-            if (monster.IsDead)
-            {
-                monster.IsDead = false;
-            }
         }
     }
 }
@@ -179,7 +141,6 @@ class Hero
         Console.WriteLine($"Base Strength: {BaseStrength} | Weapon: {WeaponEquppied} | Total: {BaseStrength + WeaponEquppied}");
         Console.WriteLine($"Base Defence: {BaseDefence}  | Armour: {ArmourEquppied} | Total: {BaseDefence + ArmourEquppied}");
         Console.WriteLine("");
-        Game.ShowAliveMonsters();
         Console.WriteLine("Press Enter/Return to go back");
         Console.WriteLine("========================================");
         Console.ReadKey();
@@ -541,6 +502,9 @@ class Fight
                 Game.MainMenu();
                 break;
             default:
+                Console.WriteLine("Invalid input, please try again: ");
+                Console.ReadKey();
+                HeroTurn();
                 break;
         }
     }
@@ -624,15 +588,22 @@ class Fight
     }
     public void Win()
     {
-        Player.FightsLost++;
+        Player.FightsWon++;
         _monstersDefeated++;
         Console.Clear();
         Console.WriteLine("========================================");
         Console.WriteLine("");
         Console.WriteLine("Congratulations");
         Console.WriteLine($"You Beat {Enemy.Name}");
+        if (_monstersDefeated == 5)
+        {
+            Console.WriteLine("You have defeated all the monsters!");
+            Console.WriteLine("Thank you for playing!");
+        }
         Console.WriteLine("");
         Console.WriteLine("========================================");
+        Console.ReadKey();
+        Game.MainMenu();
     }
 
     public void Lose()
@@ -654,6 +625,8 @@ class Fight
         Console.WriteLine("Returning user to main menu");
         Console.WriteLine("");
         Console.WriteLine("========================================");
+        Console.ReadKey();
+        Game.MainMenu();
     }
 }
 
