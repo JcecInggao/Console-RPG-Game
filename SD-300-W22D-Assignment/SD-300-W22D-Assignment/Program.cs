@@ -36,6 +36,13 @@ class Game
     {
         MainMenu();
     }
+
+    /*
+     * this method is called whenever the player has to make a choice
+     * when this method is called it will check the users string input
+     * if the input is a valid int, it will return the int back
+     * the purpose of creating this method is to reduce the amount of times i write this exact code
+     */
     public int ReadInput()
     {
         string playerInput = Console.ReadLine();
@@ -47,6 +54,12 @@ class Game
         return inputCode;
     }
 
+    /* this method is called after after a monster is defeated or after inspecting the players stats
+    * this displays the options the player can pick at the menu
+    * if the fight action is called for, it will first run a random number generator to select an available monster
+    * available monsters are monsters with the bool IsDead as false
+    * once this has selected a monster, it will call the StartFight method in the Fight Class
+    */
     public void MainMenu()
     {
         Console.Clear();
@@ -67,8 +80,6 @@ class Game
             case 2:
                 Player.ShowInventory();
                 break;
-
-
             case 3:
                 //create new list for alive monsters
                 List<Monster> availableMonsters = new List<Monster>();
@@ -91,7 +102,6 @@ class Game
                 //MainMenu();
                 Combat.StartFight(Player, currentEnemy);
                 break;
-
             default:
                 Console.WriteLine("Invalid input, please try again: ");
                 Console.ReadKey();
@@ -105,7 +115,7 @@ class Hero
 {
     // basic stats
     public string Name { get; set; }
-    public int BaseStrength { get; set; } = 50;
+    public int BaseStrength { get; set; } = 5;
     public int BaseDefence { get; set; } = 5;
     public int OriginalHealth { get; set; } = 100;
     public int CurrentHealth { get; set; }
@@ -126,7 +136,11 @@ class Hero
         Game = game;
     }
 
-
+    /*
+     * this method is only called from the MainMenu function
+     * this method only display the players statistics
+     * after a enter is pressed, the MainMenu method will be called again
+     */
     public void ShowStats()
     {
         Console.Clear();
@@ -147,6 +161,10 @@ class Hero
         Game.MainMenu();
     }
 
+    /*
+     * this method is called for in the Menu, or after this methods SubMenus (EquipWeapon and EquipArmour)
+     * this method displays the players inventory and the options to change weapons or armour
+     */
     public void ShowInventory()
     {
         // returns what items the Hero is Equipped with
@@ -155,6 +173,7 @@ class Hero
         Console.WriteLine($"{Name} Inventory:");
         Console.WriteLine("");
         Console.WriteLine("Equipped:");
+        // these switch cases will display the equipped item
         switch (WeaponEquppied)
         {
             case 5:
@@ -204,6 +223,7 @@ class Hero
         Console.WriteLine("[2] Change Armour");
         Console.WriteLine("Press Enter/Return to go back");
         Console.WriteLine("========================================");
+        // this switch case 
         switch (Game.ReadInput())
         {
             case 1:
@@ -217,6 +237,10 @@ class Hero
                 break;
         }
     }
+    /* this method brings up a menu of the weapons for the player
+     * this method allows the user to change their current equipped weapon
+     * this method can only be called when a user input is invalid or from the showinventory menu
+     */
     public void EquipWeapon()
     {
         Console.Clear();
@@ -265,6 +289,10 @@ class Hero
                 break;
         }
     }
+    /* this method brings up a menu of the armours for the player
+     * this method allows the user to change their current equipped armor
+     * this method can only be called when a user input is invalid or from the showinventory menu
+     */
     public void EquipArmour()
     {
         Console.Clear();
@@ -363,13 +391,18 @@ static class WeaponList
 {
     public static List<Weapon> Weapons { get; set; } = new List<Weapon>();
     
+    /* this method adds new instance of a weapon into a list of available weapons
+    * this method is called whenever a new weapon created wants to be added to the game
+    */
     public static void AddWeapon(Weapon weapon)
     {
         Weapons.Add(weapon);
     }
 
-    // called in the ShowInventory method to display weapons
-    // displays all weapons even if new weapons are created or added 
+    /* only used to display all the weapons in the players inventory
+    * the purpose of this method is to display any new weapons the player has acquired in their inventory
+    * this method will line up the "Power" to be more easily read and compared to in the ShowInventory menu for the user
+    */
     public static void ShowWeapons()
     {
         foreach (Weapon weapons in Weapons)
@@ -387,13 +420,18 @@ static class WeaponList
 static class ArmourList
 {
     public static List<Armour> Armours { get; set; } = new List<Armour>();
+    /* this method adds new instance of a armour into a list of available armours
+    * this method is called whenever a new armour created wants to be added to the game
+    */
     public static void AddArmour(Armour armour)
     {
         Armours.Add(armour);
     }
 
-    // called in the ShowInventory method to display armours
-    // displays all weapons even if new armours are created or added 
+    /* only used to display all the armours in the players inventory
+    * the purpose of this method is to display any new armours the player has acquired in their inventory
+    * this method will line up the "Power" to be more easily read and compared to in the ShowInventory menu for the user
+    */
     public static void ShowArmours()
     {
         foreach (Armour armours in Armours)
@@ -417,6 +455,13 @@ class Fight
     public Hero Player { get; set; }
     public Monster Enemy { get; set; }
     public Game Game { get; set; }
+    /*
+     * this method starts the fighting sequence of the game
+     * this method accepts the hero and monster as it's parameters
+     * the hero is used to display and calculate the stats of the user
+     * the monster is used to display and calculate the stats of a single monster
+     * this method is called from the main menu
+     */
     public void StartFight(Hero hero, Monster monster)
     {
         Player = hero;
@@ -440,6 +485,13 @@ class Fight
         }
     }
 
+    /*
+     * this method is called from the StartFightMethod
+     * this method asks the player for an action input and will act accordingly
+     * Attack calls the DamageCalculator function in order to deterime damage dealt to the monster
+     * Heal calls the Heal function in order to determine damage healed from the player
+     * Run leaves the fight, adds a loss to the player and enters the main menu again
+     */
     public void HeroTurn()
     {
         // The “damage” of that attack is calculated based on the Hero’s Base Strength + Equipped Weapon Power. Damage subtracts from the Current Health of the Monster.
@@ -480,18 +532,13 @@ class Fight
                 Console.ReadKey();
                 break;
             case 2:
-                int damageHeal = DamageCalculator(Player.BaseDefence, Player.ArmourEquppied);
+                int damageHeal = Heal(Player.BaseDefence, Player.ArmourEquppied);
                 Player.CurrentHealth = Player.CurrentHealth + damageHeal;
                 if (Player.CurrentHealth > Player.OriginalHealth)
                 {
-                    Console.WriteLine($"You drink a potion, restoring {damageHeal}HP");
-                    damageHeal = Player.CurrentHealth - Player.OriginalHealth;
-                    Console.WriteLine($"You've overhealed, only {damageHeal}HP was restored");
                     Player.CurrentHealth = Player.OriginalHealth;
-                } else
-                {
-                    Console.WriteLine($"You drink a potion, restoring {damageHeal} HP");
-                }
+                } 
+                Console.WriteLine($"You drink a potion, restoring {damageHeal} HP");
                 Console.WriteLine($"{Player.Name}: {Player.CurrentHealth}HP/{Player.OriginalHealth}HP");
                 Console.ReadKey();
                 break;
@@ -509,9 +556,13 @@ class Fight
         }
     }
 
+    /*
+     * this method is called from the StartFightMethod 
+     * this function is mainly used for display
+     * DamageCalculator is called in order to deterime damage dealt to the player
+     */
     public void MonsterTurn()
     {
-        // The “damage” of that attack is calculated by subtracting the Hero’s Base Defence, and Equipped Armour’s Power, from the Monster’s Strength. The result is subtracted from the Hero’s Current Health.
         int dealtDamage = DamageCalculator(Enemy.Strength);
         Player.CurrentHealth = Player.CurrentHealth - dealtDamage;
         Console.Clear();
@@ -525,9 +576,15 @@ class Fight
         Console.WriteLine("Press enter to continue");
         Console.WriteLine("========================================");
         Console.ReadKey();
-
     }
 
+    /*
+     * these next two methods are both for calculating damage
+     * the first calculates for raw strength, no weapon equipped (Monster)
+     * the second calculates for strength and an equipped weapon (Player)
+     * this helps isolate the calculations from the actual Hero or Monster turn
+     * i also added a chance of randomness in the form of critical strikes and the extra or lesser damage
+     */
     // Monster attack
     public int DamageCalculator(int strength)
     {
@@ -547,7 +604,6 @@ class Fight
 
         return totalDamage;
     }
-
     // Player attack
     public int DamageCalculator(int strength, int weaponStrength)
     {
@@ -567,8 +623,13 @@ class Fight
 
         return totalDamage;
     }
-
-    public int Heal(int defense)
+    /*
+     * similar to the damage calculators
+     * this method is used to calculate the damage healed from the heal action during the heros turn
+     * this helps isolate the calculations from the actual HeroTurn()
+     * i also added a chance of randomness in the form of critical heals and the greater or lesser healing
+     */
+    public int Heal(int defense, int armour)
     {
         // possibly higher damage
         Random rand = new Random();
@@ -576,7 +637,7 @@ class Fight
         int baseHeal = defense;
         // adds random chance to do extra healing
         int randomMultiplier = rand.Next(-3, 10);
-        int totalHeal = baseHeal + randomMultiplier;
+        int totalHeal = baseHeal + armour + randomMultiplier;
         // % to crit
         if (critChance < 10)
         {
@@ -586,6 +647,8 @@ class Fight
 
         return totalHeal;
     }
+    // this function is called when the player has defeated the monster
+    // if all the monsters are defeated it will display a new message
     public void Win()
     {
         Player.FightsWon++;
@@ -606,6 +669,8 @@ class Fight
         Game.MainMenu();
     }
 
+    // this function is called when the monster has defeated the player
+    // this function will then reset the monsters defeated and "revives" the dead monsters by turning IsDead to false
     public void Lose()
     {
         Player.FightsLost++;
