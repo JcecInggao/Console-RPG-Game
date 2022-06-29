@@ -72,22 +72,31 @@ class Game
 
         switch (ReadInput())
         {
-            case 1:
+            case 1: 
                 Hero.ShowStats();
                 break;
             case 2:
                 Hero.ShowInventory();
                 break;
             case 3:
+                //create new list for alive monsters
+                List<Monster> availableMonsters = new List<Monster>();
+                foreach (Monster monster in Monsters)
+                {
+                // checks if the monster list for alive monsters 
+                    if (!monster.IsDead)
+                    {
+                        // adds available Monsters to a new list
+                        availableMonsters.Add(monster);
+                    }
+                }
+
                 //select random monster
-                Random rnd = new Random();
-
-                Combat.StartFight(Hero, Monsters);
-                Console.WriteLine("Incomplete");
-                Console.ReadKey();
-
-
-                MainMenu();
+                Random rng = new Random();
+                int monsterIndex = rng.Next(availableMonsters.Count);
+                Monster currentEnemy = availableMonsters[monsterIndex];
+                Console.WriteLine("Initiating battle, Press enter to continue");
+                Combat.StartFight(Hero, currentEnemy);
                 break;
             default:
                 Console.WriteLine("Invalid input, please try again: ");
@@ -426,24 +435,33 @@ class Fight
     private int _monstersDefeated = 0;
     
     public Hero Player { get; set; }
-    public Monster monster { get; set; }
+    public Monster Enemy { get; set; }
 
     public void StartFight(Hero hero, Monster monster)
     {
+        Player = hero;
+        Enemy = monster;
         while (hero.CurrentHealth > 0 || monster.CurrentHealth > 0)
         {
-
+            Console.Clear();
+            Console.WriteLine("Test");
+            HeroTurn();
+            MonsterTurn();
         }
     }
 
     public void HeroTurn()
     {
         // The “damage” of that attack is calculated based on the Hero’s Base Strength + Equipped Weapon Power. Damage subtracts from the Current Health of the Monster.
-
-        //if (Monster.CurrentHealth <= 0)
-        //{
+        Console.WriteLine("========================================");
+        Console.WriteLine("What would you like to do?");
+        Console.WriteLine("========================================");
+        Console.ReadKey();
+        Enemy.CurrentHealth = 0;
+        if (Enemy.CurrentHealth <= 0)
+        {
             Win();
-        //}
+        }
     }
   
     public void MonsterTurn()
