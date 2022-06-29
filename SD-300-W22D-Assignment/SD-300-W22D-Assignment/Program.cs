@@ -15,47 +15,38 @@ Console.WriteLine("What is your name?");
 Hero hero = new Hero(Console.ReadLine(), newGame);
 newGame.Hero = hero;
 
-Weapon starterWeapon = new Weapon("Wooden Club", 5);
-Weapon weakWeapon = new Weapon("Dagger", 10);
-Weapon midWeapon = new Weapon("Mace", 15);
-Weapon strongWeapon = new Weapon("Greatsword", 20);
-WeaponList.AddWeapon(starterWeapon);
-WeaponList.AddWeapon(weakWeapon);
-WeaponList.AddWeapon(midWeapon);
-WeaponList.AddWeapon(strongWeapon);
+// Weapons
+WeaponList.AddWeapon(new Weapon("Wooden Club", 5));
+WeaponList.AddWeapon(new Weapon("Dagger", 10));
+WeaponList.AddWeapon(new Weapon("Mace", 15));
+WeaponList.AddWeapon(new Weapon("Greatsword", 20));
 
+// Armour
+ArmourList.AddArmour(new Armour("No Armour", 1));
+ArmourList.AddArmour(new Armour("Leather Armour", 5));
+ArmourList.AddArmour(new Armour("Chainmail Armour", 10));
+ArmourList.AddArmour(new Armour("Steel Armour", 15));
 
-Armour starterArmour = new Armour("No Armour", 1);
-Armour weakArmour = new Armour("Leather Armour", 5);
-Armour midArmour = new Armour("Chainmail Armour", 10);
-Armour strongArmour = new Armour("Steel Armour", 15);
-ArmourList.AddArmour(starterArmour);
-ArmourList.AddArmour(weakArmour);
-ArmourList.AddArmour(midArmour);
-ArmourList.AddArmour(strongArmour);
+// Monsters (name, att, def, hp, isDead)
+newGame.Monsters.Add(new Monster("MonStart", 3, 2, 20, false));
+newGame.Monsters.Add(new Monster("Munstir", 6, 3, 7, false));
+newGame.Monsters.Add(new Monster("Munchstur", 9, 4, 10, false));
+newGame.Monsters.Add(new Monster("Munstar", 12, 5, 15, false));
+newGame.Monsters.Add(new Monster("MonEND", 15, 6, 20, false));
 
-
-Monster enemy1 = new Monster("Munstar", 3, 2, 20);
-Monster enemy2 = new Monster("Munstar", 6, 3, 7);
-Monster enemy3 = new Monster("Munstar", 9, 4, 10);
-Monster enemy4 = new Monster("Munstar", 12, 5, 15);
-Monster enemy5 = new Monster("Munstar", 15, 6, 20);
-
-newGame.MainMenu();
-
-
-/*
- * Display the Main Menu
- * Select Main Menu options with user input (using a switch statement).
- * Handle the display and switching of any other menus. The User must be able to reach the main menu at any time.
- * Should be instantiated once at the start of the program, and invoke a method called Start which begins the game sequence.
- */
-
+newGame.Start();
 
 class Game
 {
     public Hero Hero { get; set; }
+    public Fight Combat { get; set; }
+    public List<Monster> Monsters { get; set; } = new List<Monster>();
 
+
+    public void Start()
+    {
+        MainMenu();
+    }
     public int ReadInput()
     {
         string playerInput = Console.ReadLine();
@@ -88,8 +79,14 @@ class Game
                 Hero.ShowInventory();
                 break;
             case 3:
+                //select random monster
+                Random rnd = new Random();
+
+                Combat.StartFight(Hero, Monsters);
                 Console.WriteLine("Incomplete");
                 Console.ReadKey();
+
+
                 MainMenu();
                 break;
             default:
@@ -109,13 +106,19 @@ class Game
  */
 class Hero
 {
+    // basic stats
     public string Name { get; set; }
     public int BaseStrength { get; set; } = 5;
     public int BaseDefence { get; set; } = 2;
     public int OriginalHealth { get; set; } = 100;
     public int CurrentHealth { get; set; }
+    // inventory
     public int WeaponEquppied { get; set; } = 5;
     public int ArmourEquppied { get; set; } = 1;
+    // statistics page
+    public int GamesPlayed { get; set; } = 1;
+    public int FightsWon { get; set; } = 0;
+    public int FightsLost { get; set; } = 0;
 
     public Game Game = new Game();
 
@@ -134,9 +137,9 @@ class Hero
     {
         Console.Clear();
         Console.WriteLine("========================================");
-        Console.WriteLine("Games Played: 0");
-        Console.WriteLine("Fights Won: 0");
-        Console.WriteLine("Fights Lost: 0");
+        Console.WriteLine($"Games Played: {GamesPlayed}");
+        Console.WriteLine($"Fights Won: {FightsWon}");
+        Console.WriteLine($"Fights Lost: {FightsLost}");
         Console.WriteLine($"{Name} Stats:");
         Console.WriteLine($"Health: {CurrentHealth}/{OriginalHealth} ");
         Console.WriteLine($"Base Strength: {BaseStrength} ");
@@ -196,16 +199,10 @@ class Hero
         }
         Console.WriteLine("");
         Console.WriteLine("Weapons:");
-        Console.WriteLine("Wooden Club --------- Attack: 5");
-        Console.WriteLine("Dagger -------------- Attack: 10");
-        Console.WriteLine("Mace ---------------- Attack: 15");
-        Console.WriteLine("Greatsword ---------- Attack: 20");
+        WeaponList.ShowWeapons();
         Console.WriteLine("");
         Console.WriteLine("Armours:");
-        Console.WriteLine("No Armour ---------- Defence: 1");
-        Console.WriteLine("Leather Armour ------ Defence: 5");
-        Console.WriteLine("Chainmail Armour----- Defence: 10");
-        Console.WriteLine("Steel Armour -------- Defence: 15");
+        ArmourList.ShowArmours();
         Console.WriteLine("");
         Console.WriteLine("[1] Change Weapon ");
         Console.WriteLine("[2] Change Armour");
@@ -278,7 +275,7 @@ class Hero
         Console.WriteLine("========================================");
         Console.WriteLine($"Which Armour would you like to equip?");
         Console.WriteLine("");
-        Console.WriteLine("Weapons:");
+        Console.WriteLine("Armour:");
         Console.WriteLine("[1] No Armour------------ Defence: 1");
         Console.WriteLine("[2] Leather Armour ------ Defence: 5");
         Console.WriteLine("[3] Chainmail Armour----- Defence: 10");
@@ -322,15 +319,6 @@ class Hero
                 break;
         }
     }
-
-    public void CheckEquppied(Weapon weapon)
-    {
-
-    }
-    public void CheckEquppied(Armour armour)
-    {
-
-    }
 }
 
 class Monster
@@ -340,14 +328,15 @@ class Monster
     public int Defense { get; set; }
     public int OriginalHealth { get; set; }
     public int CurrentHealth { get; set; }
-
-    public Monster(string name, int strength, int defense, int originalHealth)
+    public bool IsDead { get; set; }
+    public Monster(string name, int strength, int defense, int originalHealth, bool isDead)
     {
         Name = name;
         Strength = strength;
         Defense = defense;
         OriginalHealth = originalHealth;
         CurrentHealth = originalHealth;
+        IsDead = isDead;    
     }
 }
 
@@ -378,17 +367,26 @@ class Armour
     }
 }
 
-/*
- * WeaponList and ArmourList
- * Static classes that collect all of the Weapon and Armour instances.
- * There should be at least three individual instances of Weapons and three individual instances of Armour stored.
- */
 static class WeaponList
 {
     public static List<Weapon> Weapons { get; set; } = new List<Weapon>();
     public static void AddWeapon(Weapon weapon)
     {
         Weapons.Add(weapon);
+    }
+
+    public static void ShowWeapons()
+    {
+        foreach (Weapon weapons in Weapons)
+        {
+            // adds consistiency in the spacing in the inventory screen (within 20 characters)
+            string dashLength = "";
+            for (int i = weapons.Name.Length; i < 20; i++)
+            {
+                dashLength += "-";
+            }
+            Console.WriteLine($"{weapons.Name} {dashLength} Power: {weapons.Power}");
+        }
     }
 }
 static class ArmourList
@@ -397,6 +395,20 @@ static class ArmourList
     public static void AddArmour(Armour armour)
     {
         Armours.Add(armour);
+    }
+
+    public static void ShowArmours()
+    {
+        foreach (Armour armours in Armours)
+        {
+            // adds consistiency in the spacing in the inventory screen (within 20 characters)
+            string dashLength = "";
+            for (int i = armours.Name.Length; i < 20; i++)
+            {
+                dashLength += "-";
+            }
+            Console.WriteLine($"{armours.Name} {dashLength} Power: {armours.Power}");
+        }
     }
 }
 
@@ -413,24 +425,30 @@ class Fight
 {
     private int _monstersDefeated = 0;
     
-    public Hero Player { get; set; } 
-    public Monster Monster { get; set; }
+    public Hero Player { get; set; }
+    public Monster monster { get; set; }
 
-    public Fight(Hero hero)
+    public void StartFight(Hero hero, Monster monster)
     {
-        Player = hero;
+        while (hero.CurrentHealth > 0 || monster.CurrentHealth > 0)
+        {
+
+        }
     }
 
     public void HeroTurn()
     {
-        if (Monster.CurrentHealth <= 0)
-        {
+        // The “damage” of that attack is calculated based on the Hero’s Base Strength + Equipped Weapon Power. Damage subtracts from the Current Health of the Monster.
+
+        //if (Monster.CurrentHealth <= 0)
+        //{
             Win();
-        }
+        //}
     }
   
     public void MonsterTurn()
     {
+        // The “damage” of that attack is calculated by subtracting the Hero’s Base Defence, and Equipped Armour’s Power, from the Monster’s Strength. The result is subtracted from the Hero’s Current Health.
         if (Player.CurrentHealth <= 0)
         {
             Lose();
@@ -440,16 +458,13 @@ class Fight
     public void Win()
     {
         _monstersDefeated++;
-        if (_monstersDefeated >= 5)
-        {
-            Console.Clear();
-            Console.WriteLine("========================================");
-            Console.WriteLine("");
-            Console.WriteLine("Congratulations");
-            Console.WriteLine("You Win");
-            Console.WriteLine("");
-            Console.WriteLine("========================================");
-        }
+        Console.Clear();
+        Console.WriteLine("========================================");
+        Console.WriteLine("");
+        Console.WriteLine("Congratulations");
+        Console.WriteLine("You Win");
+        Console.WriteLine("");
+        Console.WriteLine("========================================");
     }
 
     public void Lose()
@@ -458,7 +473,7 @@ class Fight
         Console.WriteLine("========================================");
         Console.WriteLine("");
         Console.WriteLine("You Died");
-        Console.WriteLine("Game Over");
+        Console.WriteLine("Returning user to main menu");
         Console.WriteLine("");
         Console.WriteLine("========================================");
     }
